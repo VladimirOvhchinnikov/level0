@@ -1,0 +1,40 @@
+#Используем образ Golang как базовый
+FROM golang:latest as builder 
+
+#Рабочее пространство для компиляции
+WORKDIR /app
+
+# Копируем файлы 'go.mod' и 'go.sum' и устанавливаем зависимости
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Копируем исходный код проекта
+COPY . .
+RUN  go mod tidy
+
+# Собираем приложение
+RUN go build -o main .
+
+
+# Собираем приложение
+RUN go build -o main
+RUN ls -al /app
+RUN chmod +x /app/main
+
+# Используйте образ Ubuntu
+FROM ubuntu:latest
+
+# Обновите список пакетов и установите glibc
+RUN apt-get update && \
+    apt-get install -y libc6
+
+# Копируем исполняемый файл из стадии builder
+COPY --from=builder /app/main /main
+
+# Открываем порт 8080
+EXPOSE 8080
+
+# Запускаем наше приложение
+CMD ["/main"]
+
+

@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+
+  postgres:
+    image: postgres:latest
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_DB=wb
+      - POSTGRES_PASSWORD=0
+      - POSTGRES_USER=postgres
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+      - ./postgres/init-user.sql:/docker-entrypoint-initdb.d/init-user.sql
+      - ./postgres/initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+    networks:
+      - mynetworks
+
+  nats:
+    image: nats-streaming:latest
+    command: ["-sc", "/nats-streaming-server-1.conf"]
+    volumes:
+     - ./nats-streaming-server-1.conf:/nats-streaming-server-1.conf
+     - nats-data:/data/nats
+    ports:
+     - 4222:4222
+     - 8222:8222 
+    networks:
+     - mynetworks
+
+
+  microservice:
+    build: ./microservice
+    ports:
+      - 8080:8080
+    networks:
+      - mynetworks
+
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    networks:
+      - mynetworks
+
+volumes:
+  dbdata:
+  nats-data:
+networks:
+  mynetworks:
