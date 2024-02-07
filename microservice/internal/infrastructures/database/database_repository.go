@@ -126,7 +126,6 @@ func (db *DataBase) GetDataByID(ctx context.Context, id int) (models.Order, erro
 
 	order.Payment = payment
 
-	// Получение данных товаров
 	itemsQuery, args, err := squirrel.Select(
 		"chrt_id", "track_number", "price", "rid", "nameD",
 		"sale", "sizeD", "total_price", "nm_id", "brand", "statusD",

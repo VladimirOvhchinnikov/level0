@@ -7,8 +7,8 @@ import (
 	"microservice/internal/models"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
-	"time"
 
 	"github.com/go-redis/redis"
 	"github.com/nats-io/stan.go"
@@ -51,17 +51,21 @@ func (n *Nats) processMessage(m *stan.Msg) {
 }
 
 func (n *Nats) saveOrderToRedis(order models.Order) {
-	//ctx := context.Background()
 	orderJSON, err := json.Marshal(order)
 	if err != nil {
 		n.logger.Error("Failed to serialize order", zap.Error(err))
 		return
 	}
 
-	key := "order:" + order.OrderUID
+	orderID, err := n.redis.Incr("orderID").Result()
+	if err != nil {
+		n.logger.Error("Failed to increment orderID", zap.Error(err))
+		return
+	}
 
-	_, err = n.redis.Set(key, orderJSON, 0*time.Second).Result()
+	key := strconv.FormatInt(orderID, 10)
 
+	_, err = n.redis.Set(key, orderJSON, 0).Result()
 	if err != nil {
 		n.logger.Error("Failed to save/update order in Redis", zap.String("key", key), zap.Error(err))
 	} else {
@@ -69,12 +73,8 @@ func (n *Nats) saveOrderToRedis(order models.Order) {
 	}
 }
 
-// Функция для ожидания сигнала завершения (может быть запущена в главной функции)
 func (n *Nats) WaitForSignal() {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
 	<-sig
-
-	// Очистка при завершении
-	// Например, отмена подписок или закрытие соединений
 }

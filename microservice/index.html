@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Поиск данных по ID</title>
+</head>
+<body>
+    <h2>Поиск данных по ID</h2>
+    <input type="text" id="idInput" placeholder="Введите ID">
+    <button onclick="fetchData()">Получить данные</button>
+    <pre id="result"></pre>
+
+    <script>
+        function fetchData() {
+            var id = document.getElementById('idInput').value;
+            fetch('http://localhost:8080/id/' + id)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Запрос не удался: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    document.getElementById('result').textContent = error;
+                });
+        }
+    </script>
+</body>
+</html>
+

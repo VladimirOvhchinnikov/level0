@@ -10,6 +10,7 @@ import (
 	"microservice/internal/infrastructures/route"
 	"microservice/internal/infrastructures/server"
 	"microservice/internal/usecase"
+	"time"
 
 	"github.com/go-redis/redis"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -18,6 +19,8 @@ import (
 )
 
 func main() {
+
+	time.Sleep(5 * time.Second)
 	//Инициализируем логгер
 	logger, _ := zap.NewProduction()
 
@@ -54,10 +57,11 @@ func main() {
 	usecaset := usecase.NewGetData(logger, redisClient, postgresCleint)
 
 	//Инициализируем контроллер для ID
-	controller := controller.NewIDSearch(logger, usecaset)
+	controllerID := controller.NewIDSearch(logger, usecaset)
+	controllerWeb := controller.NewWebRequest(logger, usecaset)
 
 	//Инициализируем роутер
-	router := route.NewRouter(logger, controller)
+	router := route.NewRouter(logger, controllerID, controllerWeb)
 	//Инициализируем минималный роутинг для задачи
 	router.MyRouter()
 	//Инициализируем сервер
