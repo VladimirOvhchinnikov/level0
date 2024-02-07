@@ -24,7 +24,6 @@ func NewIDSearch(logger *zap.Logger, usecase usecase.Usecaser) *IDSearch {
 func (id *IDSearch) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	pathArguments := strings.Split(r.URL.Path, "/")
 
-	// Проверка на достаточное количество сегментов в URL
 	if len(pathArguments) < 3 {
 		id.logger.Error("Недостаточно сегментов в URL")
 		http.Error(w, "Недостаточно сегментов в URL", http.StatusBadRequest)

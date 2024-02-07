@@ -16,7 +16,6 @@ func main() {
 	}
 	defer sc.Close()
 
-	// Подписка на канал
 	sub, err := sc.Subscribe("wbCluster", func(m *stan.Msg) {
 		log.Printf("Received a message: %s\n", string(m.Data))
 	}, stan.DeliverAllAvailable())
@@ -25,7 +24,6 @@ func main() {
 	}
 	defer sub.Unsubscribe()
 
-	// Ожидание сигнала для завершения
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
 	<-sig
